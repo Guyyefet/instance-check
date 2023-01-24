@@ -10,12 +10,12 @@ instance_email = {}
 tag = {}
 protected_instances = []
 pls_check_instances = []
-issent = False
+is_email_sent = False
 
 class Email_Data:
-  def __init__(self, email: str, issent: bool, timestamp: datetime):
+  def __init__(self, email: str, is_email_sent: bool, timestamp: datetime):
     self.email = email
-    self.issent = issent
+    self.is_email_sent = is_email_sent
     self.timestamp = timestamp
 
 
@@ -35,7 +35,7 @@ def check_instance_runtime(instance_email, tag):
     instance_uptime = instance_uptime.seconds
     if instance_uptime in range(30, 300):
       pls_check_instances.append(instance)
-      check_issent()
+      check_is_email_sent()
       print('instance is running more then a week', pls_check_instances, instance_uptime, instance_email)
     elif instance_uptime >= 300:
       instance.stop()
@@ -50,17 +50,17 @@ def get_email_data(instance_email):
         instance_email = tag['Value']
       else:
         pass
-      email_data = Email_Data(instance_email, issent, datetime.now(timezone.utc))
-      # email_data1 = email_data(instance_email, issent, timestamp)
+      email_data = Email_Data(instance_email, is_email_sent, datetime.now(timezone.utc))
+      # email_data1 = email_data(instance_email, is_email_sent, timestamp)
 
-def send_email(instance_email, issent):
+def send_email(instance_email, is_email_sent):
   pass
 
-def check_issent(issent):
-  if issent == False:
+def check_is_email_sent(is_email_sent):
+  if is_email_sent == False:
     send_email()
   else:
-    print("issent is True")
+    print("is_email_sent == True")
 
 
 
@@ -68,4 +68,4 @@ def check_issent(issent):
 
 instance_tags_check()
 check_instance_runtime(tag, instance_email)
-get_email_data(instance_email, issent)
+get_email_data(instance_email, is_email_sent)
