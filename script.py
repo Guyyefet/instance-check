@@ -6,8 +6,8 @@ EC2_RESOURCE = boto3.resource('ec2', 'us-east-1')
 # EC2_CLIENT = boto3.client('ec2')
 
 # tag = EC2_RESOURCE.Tag('resource_id','key','value')
-instance_email = {}
-tag = {}
+instance_email = ''
+tag = ''
 protected_instances = []
 pls_check_instances = []
 is_email_sent = False
@@ -27,15 +27,15 @@ def instance_tags_check():
       print("protected instances:", instance.id, instance.tags)
     else:
       instance.stop()
-      print("stopped instances:", protected_instances)
+      print("stopped instances:", instance.id)
       
-def check_instance_runtime(instance_email, tag):
+def check_instance_runtime():
   for instance in protected_instances:
     instance_uptime = datetime.now(timezone.utc) - instance.launch_time
     instance_uptime = instance_uptime.seconds
     if instance_uptime in range(30, 300):
       pls_check_instances.append(instance)
-      check_is_email_sent()
+      get_email_data()
       print('instance is running more then a week', pls_check_instances, instance_uptime, instance_email)
     elif instance_uptime >= 300:
       instance.stop()
@@ -43,29 +43,33 @@ def check_instance_runtime(instance_email, tag):
     else: 
       print('instance is running less then a week', instance.id)
 
-def get_email_data(instance_email):
+def get_email_data(tag, instance_email, is_email_sent):
   for instance in pls_check_instances:
     for tag in instance.tags:
       if tag['Key'] == 'Email':
         instance_email = tag['Value']
       else:
         pass
-      email_data = Email_Data(instance_email, is_email_sent, datetime.now(timezone.utc))
+email_data = Email_Data(instance_email, is_email_sent, datetime.now(timezone.utc))
       # email_data1 = email_data(instance_email, is_email_sent, timestamp)
 
-def send_email(instance_email, is_email_sent):
-  pass
+# def send_email(instance_email, is_email_sent):
+#   pass
 
-def check_is_email_sent(is_email_sent):
-  if is_email_sent == False:
-    send_email()
-  else:
-    print("is_email_sent == True")
+# def check_is_email_sent(is_email_sent):
+#   if Email_Data.is_email_sent == False:
+#     send_email()
+#   else:
+#     if Email_Data.datetime.days >= 1:
+#       Email_Data.is_email_sent == True
+#       print("Email already sent today")
+#     else:
+#       pass
 
 
 
   
-
+print(vars(email_data))
 instance_tags_check()
-check_instance_runtime(tag, instance_email)
-get_email_data(instance_email, is_email_sent)
+check_instance_runtime()
+get_email_data(tag, instance_email, is_email_sent)
