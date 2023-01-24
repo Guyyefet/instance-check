@@ -10,6 +10,13 @@ instance_email = {}
 tag = {}
 protected_instances = []
 pls_check_instances = []
+issent = False
+
+class Email_Data:
+  def __init__(self, email: str, issent: bool, timestamp: datetime):
+    self.email = email
+    self.issent = issent
+    self.timestamp = timestamp
 
 
 def instance_tags_check():
@@ -17,70 +24,48 @@ def instance_tags_check():
   for instance in instances:
     if {'Key': 'Status', 'Value': 'Protected'} in instance.tags:
       protected_instances.append(instance)
-      print("protected instances:", instance.id, instance.tags, type(instance))
+      print("protected instances:", instance.id, instance.tags)
     else:
       instance.stop()
-      print("stopped instances:", protected_instances, type(instance))
-
+      print("stopped instances:", protected_instances)
+      
 def check_instance_runtime(instance_email, tag):
   for instance in protected_instances:
     instance_uptime = datetime.now(timezone.utc) - instance.launch_time
     instance_uptime = instance_uptime.seconds
-    for tag in instance.tags:
-      if tag['Key'] == 'Email':
-          instance_email = tag['Value']
     if instance_uptime in range(30, 300):
-    # if 300 >= instance_uptime >= 30:
-      print('here')
       pls_check_instances.append(instance)
+      check_issent()
       print('instance is running more then a week', pls_check_instances, instance_uptime, instance_email)
     elif instance_uptime >= 300:
-      print('here2')
       instance.stop()
       print('instance is running more then 2 weeks, instance is stopped', pls_check_instances, instance_uptime, instance_email)
     else: 
-      print('here3')
       print('instance is running less then a week', instance.id)
 
-# def send_email(instance_email):
+def get_email_data(instance_email):
+  for instance in pls_check_instances:
+    for tag in instance.tags:
+      if tag['Key'] == 'Email':
+        instance_email = tag['Value']
+      else:
+        pass
+      email_data = Email_Data(instance_email, issent, datetime.now(timezone.utc))
+      # email_data1 = email_data(instance_email, issent, timestamp)
 
-#   def verify_email_identity():
-#     ses_client = boto3.client("ses", region_name="us-east-1")
-#     response = ses_client.verify_email_identity(
-#         EmailAddress="guy.yefet@gmail"
-#     )
-#     print(response)
+def send_email(instance_email, issent):
+  pass
 
-# def send_email(pls_check_instances):
-#     from taskworking1 import email_value 
-#     ses_client = boto3.client("ses", region_name="us-east-1")
-#     CHARSET = "UTF-8"
+def check_issent(issent):
+  if issent == False:
+    send_email()
+  else:
+    print("issent is True")
 
-#     # email address imported and got put into destination
-#     # developer is noted on instance status
-#     response = ses_client.send_email(
-#         Destination={
-#             "ToAddresses": [
-#                                email_value
-#             ],
-#         },
-#         Message={
-#             "Body": {
-#                 "Text": { 
-#                     "Charset": CHARSET,
-#                     "Data": 'Please check your instance status', pls_check_instances,
-#                 }
-#             },
-#             "Subject": {
-#                 "Charset": CHARSET,
-#                 "Data": "instance notification",
-#             },
-#         },
-#         Source="guy.yefet@gmail.com",
-#     )
+
+
   
-
-
 
 instance_tags_check()
 check_instance_runtime(tag, instance_email)
+get_email_data(instance_email, issent)
